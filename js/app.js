@@ -42,6 +42,19 @@
   function load() { try { return JSON.parse(localStorage.getItem(STORE_KEY)); } catch (_) { return null; } }
   function clearSaved() { try { localStorage.removeItem(STORE_KEY); } catch (_) {} }
 
+  /* ------------------------------------------------------------------ theme */
+  const THEME_KEY = "sigmock.theme";
+  const getTheme = () => document.documentElement.dataset.theme === "light" ? "light" : "dark";
+  const editorTheme = () => (getTheme() === "dark" ? "material-darker" : "default");
+  function setTheme(t) {
+    document.documentElement.dataset.theme = t;
+    try { localStorage.setItem(THEME_KEY, t); } catch (_) {}
+    if (editor) editor.setOption("theme", editorTheme());
+    document.querySelectorAll(".hr-theme").forEach(b => { b.textContent = t === "dark" ? "☀" : "☾"; b.title = t === "dark" ? "Switch to light theme" : "Switch to dark theme"; });
+    const sel = document.getElementById("themeSel"); if (sel) sel.value = t;
+  }
+  document.addEventListener("click", e => { if (e.target.closest && e.target.closest(".hr-theme")) setTheme(getTheme() === "dark" ? "light" : "dark"); });
+
   /* ---------------------------------------------------------------- helpers */
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const h = (html) => { const t = document.createElement("template"); t.innerHTML = html.trim(); return t.content.firstElementChild; };
@@ -144,6 +157,7 @@
         <div class="hr-test-name">${esc(TEST_NAME)} · Mock</div>
       </div>
       <div class="right">
+        <button class="hr-theme" title="${getTheme() === "dark" ? "Switch to light theme" : "Switch to dark theme"}">${getTheme() === "dark" ? "☀" : "☾"}</button>
         ${withTimer ? `<div class="hr-timer" id="timer">⏱ <span id="timerText">--</span></div>
         <div class="hr-cam" id="camThumb">${S.settings.camera ? "" : "cam off"}</div>
         <button class="end-test" id="endTest">End Test</button>` : ""}
@@ -188,6 +202,8 @@
               <option value="C" ${st.set === "C" ? "selected" : ""}>Mock C: optimal stopping, counting, sequences</option>
               <option value="R" ${st.set === "R" ? "selected" : ""}>Random mix (from all 40 math questions)</option>
             </select></div>
+          <div class="field"><label>Colour scheme</label>
+            <select id="themeSel"><option value="dark" ${getTheme() === "dark" ? "selected" : ""}>Dark</option><option value="light" ${getTheme() === "light" ? "selected" : ""}>Light</option></select></div>
           <label class="check"><input type="checkbox" id="timed" ${st.timed ? "checked" : ""}> 75-minute timer (auto-submits at 0)</label>
           <label class="check"><input type="checkbox" id="hints" ${st.hints ? "checked" : ""}> Enable 💡 Hint button</label>
           <label class="check"><input type="checkbox" id="strict" ${st.strict ? "checked" : ""}> Strict mode: leaving the window ends the test (like the real one)</label>
@@ -196,6 +212,7 @@
         <div style="margin-top:20px"><button class="btn btn-primary btn-lg" id="start" disabled>Start Test</button></div>
       </div>
     </div></div></div>`;
+    document.getElementById("themeSel").onchange = e => setTheme(e.target.value);
     const agree = document.getElementById("agree"), start = document.getElementById("start");
     agree.onchange = () => { start.disabled = !agree.checked; };
     start.onclick = () => {
@@ -480,7 +497,7 @@
           <select id="lang">${Object.keys(q.stubs).map(l => `<option value="${l}" ${l === cs.lang ? "selected" : ""}>${LANG_LABEL[l]}</option>`).join("")}</select>
           <div class="right">
             <button class="icon-btn" id="resetCode" title="Reset to the starter code">⟲ Reset</button>
-            <button class="icon-btn" id="themeBtn" title="Toggle editor theme">◐ Theme</button>
+            <button class="icon-btn" id="themeBtn" title="Toggle dark / light theme">◐ Theme</button>
           </div>
         </div>
         <div class="editor-wrap" id="editorWrap"></div>
@@ -493,7 +510,7 @@
       </section></div>`;
     editor = CodeMirror(document.getElementById("editorWrap"), {
       value: cs.src[cs.lang], mode: LANG_MODE[cs.lang], lineNumbers: true, indentUnit: 4, tabSize: 4,
-      indentWithTabs: false, matchBrackets: true, autoCloseBrackets: true, theme: S._theme || "default",
+      indentWithTabs: false, matchBrackets: true, autoCloseBrackets: true, theme: editorTheme(),
       extraKeys: { Tab: cm => cm.somethingSelected() ? cm.indentSelection("add") : cm.replaceSelection("    ", "end") },
     });
     let saveT; editor.on("change", () => { clearTimeout(saveT); saveT = setTimeout(persistEditor, 400); });
@@ -511,7 +528,7 @@
         cs.src[cs.lang] = q.stubs[cs.lang]; editor.setValue(cs.src[cs.lang]); save();
       }
     };
-    document.getElementById("themeBtn").onclick = () => { S._theme = S._theme === "material-darker" ? "default" : "material-darker"; editor.setOption("theme", S._theme); save(); };
+    document.getElementById("themeBtn").onclick = () => setTheme(getTheme() === "dark" ? "light" : "dark");
     document.getElementById("runBtn").onclick = () => runCode(q, false);
     document.getElementById("submitBtn").onclick = () => runCode(q, true);
     Runner.onStatus = () => { const el = document.getElementById("runnerStatus"); if (el) el.textContent = Runner.statusText(); };

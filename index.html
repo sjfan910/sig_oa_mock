@@ -4,6 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>SIG Assessment Mock</title>
+  <script>
+    // Apply the saved colour scheme before first paint (default: dark).
+    (function () { var t = "dark"; try { t = localStorage.getItem("sigmock.theme") || "dark"; } catch (e) {} document.documentElement.dataset.theme = t === "light" ? "light" : "dark"; })();
+  </script>
   <link rel="stylesheet" href="vendor/katex/katex.min.css">
   <link rel="stylesheet" href="vendor/codemirror/codemirror.css">
   <link rel="stylesheet" href="vendor/codemirror/material-darker.css">
