@@ -1,0 +1,49 @@
+Taylor Swift Flight Log
+
+BUR to LAS
+39 min
+249 gal
+$1393
+3 tons
+
+CPS to SUS
+13 min
+79 gal
+$443
+0.8342 tons
+
+BWI to BNA
+84 min
+536 gal
+$2999
+6 tons
+
+MKC to MMU
+111 min
+707 gal
+$3958
+7 tons
+
+BNA to MKC
+66 min
+423 gal
+$2367
+4 tons
+
+MMU to BNA
+128 min
+816 gal
+$4569
+9 tons
+
+MMU to MKC
+164 min
+1039 gal
+$5819
+11 tons
+
+SUS to CPS
+26 min
+151 gal
+$844
+2 tons
